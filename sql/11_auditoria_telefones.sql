@@ -4,16 +4,15 @@
 
 CREATE TABLE IF NOT EXISTS auditoria_telefone (
     id_auditoria SERIAL PRIMARY KEY,
-    tabela_afetada VARCHAR(30), -- 'telefone' ou 'pessoa_telefone'
-    operacao VARCHAR(10),       -- 'INSERT', 'UPDATE', 'DELETE'
-    id_registro INTEGER,        -- id_telefone ou id da pessoa_telefone
+    tabela_afetada VARCHAR(30),
+    operacao VARCHAR(10),
+    id_registro INTEGER,
     dados_anteriores JSONB,
     dados_novos JSONB,
     usuario VARCHAR(50) DEFAULT current_user,
     data_hora TIMESTAMP DEFAULT NOW()
 );
 
--- Função trigger para capturar mudanças em telefone
 CREATE OR REPLACE FUNCTION auditoria_telefone_trg()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
 BEGIN
@@ -34,12 +33,10 @@ BEGIN
 END;
 $$;
 
--- Aplicar trigger na tabela telefone
 CREATE TRIGGER trg_auditoria_telefone
 AFTER INSERT OR UPDATE OR DELETE ON telefone
 FOR EACH ROW EXECUTE FUNCTION auditoria_telefone_trg();
 
--- Aplicar trigger na tabela pessoa_telefone (adaptada para registrar o id da relação)
 CREATE OR REPLACE FUNCTION auditoria_pessoa_telefone_trg()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
 BEGIN
@@ -64,7 +61,6 @@ CREATE TRIGGER trg_auditoria_pessoa_telefone
 AFTER INSERT OR UPDATE OR DELETE ON pessoa_telefone
 FOR EACH ROW EXECUTE FUNCTION auditoria_pessoa_telefone_trg();
 
--- (Opcional) Criar uma view para consultar auditoria de forma amigável
 CREATE OR REPLACE VIEW vw_auditoria_telefone AS
 SELECT 
     a.data_hora,
